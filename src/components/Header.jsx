@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     overflow: "hidden",
-    paddingBottom: 12, // reduce bottom padding to bring Recommended closer
+    paddingBottom: 12, // bring "Recommended" closer
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -71,14 +71,15 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingTop: 48,
-    paddingBottom: 18, // reduced padding for closer spacing
-    paddingHorizontal: 20,
+    paddingBottom: 18,
+    paddingHorizontal: 0, // 👈 removed extra side spacing
   },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 22, // slightly smaller bottom margin
+    marginHorizontal: 12, // 👈 keep small breathing room
+    marginBottom: 22,
   },
   homeRow: {
     flexDirection: "row",
@@ -119,6 +120,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: 8,
+    marginHorizontal: 12, // 👈 search bar has side spacing only
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

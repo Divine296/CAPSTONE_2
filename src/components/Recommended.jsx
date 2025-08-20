@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, FlatList, Image, Dimensions, Animated, StyleSheet } from "react-native";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
@@ -13,27 +13,45 @@ const recommendedData = [
 
 export default function Recommended() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const flatListRef = useRef(null);
+  const autoSlideRef = useRef(null);
 
   const [fontsLoaded] = useFonts({
     Roboto_400Regular,
     Roboto_700Bold,
   });
 
+  // ✅ Auto-slide effect
+  useEffect(() => {
+    autoSlideRef.current = setInterval(() => {
+      let nextIndex = (activeIndex + 1) % recommendedData.length;
+      setActiveIndex(nextIndex);
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+    }, 3000); // every 3 seconds
+
+    return () => clearInterval(autoSlideRef.current);
+  }, [activeIndex]);
+
   if (!fontsLoaded) return null;
 
   return (
     <View style={styles.container}>
+      {/* ✅ Same alignment as Categories */}
       <Text style={styles.title}>Recommended for you</Text>
       <View style={styles.underline} />
 
       <FlatList
+        ref={flatListRef}
         data={recommendedData}
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         snapToInterval={width * 0.7 + 16}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: 12, marginTop: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 8, marginTop: 12 }}
         onScroll={(e) => {
           const index = Math.round(e.nativeEvent.contentOffset.x / (width * 0.7 + 16));
           setActiveIndex(index);
@@ -60,7 +78,7 @@ export default function Recommended() {
             >
               <Image source={item.image} style={styles.image} />
               <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.6)']}
+                colors={["transparent", "rgba(0,0,0,0.6)"]}
                 style={styles.gradient}
               />
               <Text style={styles.overlayText}>{item.title}</Text>
@@ -85,9 +103,15 @@ export default function Recommended() {
 }
 
 const styles = StyleSheet.create({
-  container: { paddingHorizontal: 20, marginTop: 16 },
+  container: { paddingHorizontal: 8, marginTop: 16 }, // ✅ same as Categories
   title: { fontFamily: "Roboto_700Bold", fontSize: 20, color: "black" },
-  underline: { height: 4, width: 56, backgroundColor: "#f97316", borderRadius: 4, marginTop: 4 },
+  underline: {
+    height: 4,
+    width: 56,
+    backgroundColor: "#f97316",
+    borderRadius: 4,
+    marginTop: 4,
+  },
   image: { width: "100%", height: "100%" },
   gradient: {
     position: "absolute",

@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, Image, StyleSheet } from "react-native";
 
 export default function CategoryItem({ image, title, onPress }) {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.container}>
-      <Image source={image} style={styles.image} resizeMode="contain" />
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <View style={styles.iconContainer}>
+        <Image source={image} style={styles.image} resizeMode="contain" />
+      </View>
       <Text style={styles.title}>{title}</Text>
     </TouchableOpacity>
   );
@@ -12,34 +14,26 @@ export default function CategoryItem({ image, title, onPress }) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f97316", // Tailwind orange-500
+    flex: 1,
+    backgroundColor: "#FF6600", // ✅ solid orange
     borderRadius: 16,
-    padding: 16,
-    marginVertical: 6,
-    marginHorizontal: 12,
-
-    // Shadow for iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-
-    // Elevation for Android
-    elevation: 4,
+    alignItems: "center",
+    paddingVertical: 16,
+    marginHorizontal: 4,
+  },
+  iconContainer: {
+    marginBottom: 2, // ⬅️ reduced spacing between icon and text
   },
   image: {
     width: 50,
     height: 50,
-    borderRadius: 8,
-    marginRight: 16,
   },
   title: {
+    fontSize: 14,
+    fontWeight: "900", // ✅ bold text
     color: "#fff",
-    fontSize: 20,                   // slightly larger
-    fontWeight: "700",              // bolder
-    textShadowColor: "rgba(0,0,0,0.25)", // subtle shadow
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },

@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   title: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900", // ✅ bold text
     color: "#fff",
     textAlign: "center",

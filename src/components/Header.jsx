@@ -7,7 +7,7 @@ import {
   ImageBackground,
   StyleSheet,
 } from "react-native";
-import { Bell, Settings, ChevronDown, Search } from "lucide-react-native";
+import { Bell, Settings, Search } from "lucide-react-native";
 
 export default function Header() {
   return (
@@ -22,10 +22,9 @@ export default function Header() {
       <View style={styles.container}>
         {/* Top row: Home + Icons */}
         <View style={styles.topRow}>
-          {/* Left: Home + Chevron */}
+          {/* Left: Home */}
           <View style={styles.homeRow}>
             <Text style={styles.homeText}>Home</Text>
-            <ChevronDown size={22} color="black" style={{ marginLeft: 6 }} />
           </View>
 
           {/* Right: Bell + Settings */}
@@ -63,22 +62,22 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     overflow: "hidden",
-    paddingBottom: 12, // bring "Recommended" closer
+    paddingBottom: 12,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(254,192,117,0.5)", // semi-transparent orange
+    backgroundColor: "rgba(254,192,117,0.5)",
   },
   container: {
     paddingTop: 48,
     paddingBottom: 18,
-    paddingHorizontal: 0, // 👈 removed extra side spacing
+    paddingHorizontal: 0,
   },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginHorizontal: 12, // 👈 keep small breathing room
+    marginHorizontal: 12,
     marginBottom: 22,
   },
   homeRow: {
@@ -86,9 +85,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   homeText: {
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 30,
+    fontWeight: "900",
     color: "black",
+    textShadowColor: "rgba(0,0,0,0.1)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   iconsRow: {
     flexDirection: "row",
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    marginHorizontal: 12, // 👈 search bar has side spacing only
+    marginHorizontal: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

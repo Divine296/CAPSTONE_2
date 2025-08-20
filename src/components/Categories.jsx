@@ -7,8 +7,6 @@ const categories = [
   { id: "2", title: "Meals", image: require("../../assets/choices/meals.png") },
   { id: "3", title: "Snacks", image: require("../../assets/choices/snacks.png") },
   { id: "4", title: "Drinks", image: require("../../assets/choices/drinks.png") },
-  { id: "5", title: "Desserts", image: require("../../assets/choices/desserts.png") },
-  { id: "6", title: "Extras", image: require("../../assets/choices/extras.png") },
 ];
 
 export default function Categories() {

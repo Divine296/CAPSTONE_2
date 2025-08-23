@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { useCart } from "../../../context/CartContext"; // ✅ Import your global cart
 
 const { width } = Dimensions.get("window");
 
@@ -27,51 +28,63 @@ const drinks = [
 
 export default function Drinks() {
   const router = useRouter();
-  const [cart, setCart] = useState({});
-  const [total, setTotal] = useState(0);
+  const { addToCart } = useCart(); // ✅ Use global cart
+  const [qtyMap, setQtyMap] = useState({});
 
   const [fontsLoaded] = useFonts({
     Roboto_400Regular,
     Roboto_700Bold,
   });
-
   if (!fontsLoaded) return null;
 
-  const addToCart = (item) => {
-    const newCart = { ...cart };
-    newCart[item.id] = (newCart[item.id] || 0) + 1;
-    setCart(newCart);
-    setTotal(total + item.price);
+  const increaseQty = (item) => {
+    setQtyMap((prev) => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
   };
 
-  const removeFromCart = (item) => {
-    if (!cart[item.id]) return;
-    const newCart = { ...cart };
-    newCart[item.id] -= 1;
-    if (newCart[item.id] <= 0) delete newCart[item.id];
-    setCart(newCart);
-    setTotal(total - item.price);
+  const decreaseQty = (item) => {
+    setQtyMap((prev) => {
+      const newQty = (prev[item.id] || 0) - 1;
+      return { ...prev, [item.id]: newQty > 0 ? newQty : 0 };
+    });
+  };
+
+  const handleCheckout = () => {
+    Object.entries(qtyMap).forEach(([itemId, qty]) => {
+      const item = drinks.find((d) => d.id === itemId);
+      for (let i = 0; i < qty; i++) {
+        addToCart(item); // ✅ Add to global cart
+      }
+    });
+    router.push("/cart"); // Go to CartScreen
   };
 
   const renderItem = ({ item }) => {
-    const qty = cart[item.id] || 0;
+    const qty = qtyMap[item.id] || 0;
+
     return (
       <View style={styles.card}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>₱{item.price}</Text>
 
         <View style={styles.controls}>
-          <TouchableOpacity style={styles.controlBtn} onPress={() => removeFromCart(item)}>
+          <TouchableOpacity style={styles.controlBtn} onPress={() => decreaseQty(item)}>
             <Ionicons name="remove" size={18} color="#fff" />
           </TouchableOpacity>
+
           <Text style={styles.qty}>{qty}</Text>
-          <TouchableOpacity style={styles.controlBtn} onPress={() => addToCart(item)}>
+
+          <TouchableOpacity style={styles.controlBtn} onPress={() => increaseQty(item)}>
             <Ionicons name="add" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
     );
   };
+
+  const totalPrice = Object.entries(qtyMap).reduce((sum, [itemId, qty]) => {
+    const item = drinks.find((d) => d.id === itemId);
+    return sum + item.price * qty;
+  }, 0);
 
   return (
     <View style={styles.container}>
@@ -102,13 +115,10 @@ export default function Drinks() {
       />
 
       {/* Floating Cart */}
-      {total > 0 && (
-        <TouchableOpacity
-          style={styles.floatingCart}
-          onPress={() => router.push("/cart")}
-        >
+      {totalPrice > 0 && (
+        <TouchableOpacity style={styles.floatingCart} onPress={handleCheckout}>
           <Ionicons name="cart-outline" size={22} color="#fff" />
-          <Text style={styles.cartText}>₱{total} • Checkout</Text>
+          <Text style={styles.cartText}>₱{totalPrice} • Checkout</Text>
         </TouchableOpacity>
       )}
     </View>

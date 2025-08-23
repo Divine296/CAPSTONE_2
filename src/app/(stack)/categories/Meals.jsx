@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { useCart } from "../../../context/CartContext"; // ✅ Import your CartContext
 
 const { width } = Dimensions.get("window");
 
@@ -26,8 +27,8 @@ const meals = [
 
 export default function MealsScreen() {
   const router = useRouter();
-  const [cart, setCart] = useState({});
-  const [total, setTotal] = useState(0);
+  const { cart, addToCart, removeFromCart } = useCart(); // ✅ Use global cart
+  const [qtyMap, setQtyMap] = useState({});
 
   // Load Roboto font
   let [fontsLoaded] = useFonts({
@@ -37,24 +38,29 @@ export default function MealsScreen() {
 
   if (!fontsLoaded) return null;
 
-  const addToCart = (meal) => {
-    const newCart = { ...cart };
-    newCart[meal.id] = (newCart[meal.id] || 0) + 1;
-    setCart(newCart);
-    setTotal(total + meal.price);
+  const increaseQty = (meal) => {
+    setQtyMap((prev) => ({ ...prev, [meal.id]: (prev[meal.id] || 0) + 1 }));
   };
 
-  const removeFromCart = (meal) => {
-    if (!cart[meal.id]) return;
-    const newCart = { ...cart };
-    newCart[meal.id] -= 1;
-    if (newCart[meal.id] <= 0) delete newCart[meal.id];
-    setCart(newCart);
-    setTotal(total - meal.price);
+  const decreaseQty = (meal) => {
+    setQtyMap((prev) => {
+      const newQty = (prev[meal.id] || 0) - 1;
+      return { ...prev, [meal.id]: newQty > 0 ? newQty : 0 };
+    });
+  };
+
+  const handleCheckout = () => {
+    Object.entries(qtyMap).forEach(([mealId, qty]) => {
+      const meal = meals.find((m) => m.id === mealId);
+      for (let i = 0; i < qty; i++) {
+        addToCart(meal); // ✅ Add each item to global cart
+      }
+    });
+    router.push("/cart"); // Go to CartScreen
   };
 
   const renderItem = ({ item }) => {
-    const qty = cart[item.id] || 0;
+    const qty = qtyMap[item.id] || 0;
 
     return (
       <View style={styles.card}>
@@ -65,7 +71,9 @@ export default function MealsScreen() {
         <View style={styles.controls}>
           <TouchableOpacity
             style={styles.controlBtn}
-            onPress={() => removeFromCart(item)}
+            onPress={() => {
+              decreaseQty(item);
+            }}
           >
             <Ionicons name="remove" size={18} color="#fff" />
           </TouchableOpacity>
@@ -74,7 +82,9 @@ export default function MealsScreen() {
 
           <TouchableOpacity
             style={styles.controlBtn}
-            onPress={() => addToCart(item)}
+            onPress={() => {
+              increaseQty(item);
+            }}
           >
             <Ionicons name="add" size={18} color="#fff" />
           </TouchableOpacity>
@@ -83,7 +93,10 @@ export default function MealsScreen() {
     );
   };
 
-  const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  const totalPrice = Object.entries(qtyMap).reduce((sum, [mealId, qty]) => {
+    const meal = meals.find((m) => m.id === mealId);
+    return sum + meal.price * qty;
+  }, 0);
 
   return (
     <View style={styles.container}>
@@ -119,13 +132,13 @@ export default function MealsScreen() {
       />
 
       {/* Floating Cart */}
-      {total > 0 && (
+      {totalPrice > 0 && (
         <TouchableOpacity
           style={styles.floatingCart}
-          onPress={() => router.push("/cart")}
+          onPress={handleCheckout} // ✅ Adds to global cart
         >
           <Ionicons name="cart-outline" size={22} color="#fff" />
-          <Text style={styles.cartText}>₱{total} • Checkout</Text>
+          <Text style={styles.cartText}>₱{totalPrice} • Checkout</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -162,11 +175,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: "Roboto_700Bold",
     color: "#1F2937",
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1.5,
-    textDecorationColor: "#F59E0B",
-    textDecorationStyle: "solid",
   },
 
   card: {
@@ -180,16 +188,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    borderWidth: 2,        // ✅ Orange border added
-    borderColor: "#f97316", // ✅ Orange border color
+    borderWidth: 2,
+    borderColor: "#f97316",
   },
   image: { width: "100%", height: 100, borderRadius: 8, marginBottom: 8 },
-  name: { 
-    fontSize: 16, 
-    fontFamily: "Roboto_700Bold", // ✅ Roboto bold
-    color: "#333",
-    marginBottom: 4,
-  },
+  name: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333", marginBottom: 4 },
   price: { fontSize: 14, color: "#777", marginBottom: 8 },
 
   controls: {

@@ -9,26 +9,58 @@ import {
   ImageBackground,
   ScrollView,
   Alert,
+  Modal,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCart } from "../../context/CartContext";
 import { useRouter } from "expo-router";
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import {
+  useFonts,
+  Roboto_400Regular,
+  Roboto_700Bold,
+} from "@expo-google-fonts/roboto";
 
 export default function CartScreen() {
   const router = useRouter();
   const { cart, removeFromCart, increaseQuantity, decreaseQuantity } = useCart();
   const [selectedTime, setSelectedTime] = useState(null);
-
+  const [showModal, setShowModal] = useState(false);
+  const [showFullModal, setShowFullModal] = useState(false);
+  const [orderType, setOrderType] = useState(null);
+  
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  let [fontsLoaded] = useFonts({
-    Roboto_400Regular,
-    Roboto_700Bold,
-  });
+  let [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
   if (!fontsLoaded) return null;
 
   const pickupTimes = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM"];
+
+  const handleProceed = () => {
+    if (!selectedTime) {
+      Alert.alert("Pickup Time Required", "Please select a pickup time before proceeding.");
+      return;
+    }
+    setShowModal(true);
+  };
+
+  const handleTakeout = () => {
+    router.push(`/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`);
+  };
+
+  const handleDineIn = () => {
+    const isFull = true; // replace with real backend check
+    if (isFull) {
+      setShowModal(false);
+      setShowFullModal(true);
+    } else {
+      router.push(`/cart/payment?orderType=dinein&total=${total}&selectedTime=${selectedTime}`);
+    }
+  };
+
+  const handleTakeoutInstead = () => {
+    setShowFullModal(false);
+    router.push(`/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`);
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -53,71 +85,32 @@ export default function CartScreen() {
   );
 
   const renderFooter = () => (
-    <>
+    <View>
       <TouchableOpacity style={styles.addMoreBtn} onPress={() => router.back()}>
         <Text style={styles.addMoreText}>+ Add more items</Text>
       </TouchableOpacity>
-
       <View style={styles.pickupContainer}>
         <Text style={styles.pickupLabel}>Select Pickup Time:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {pickupTimes.map((time) => (
             <TouchableOpacity
               key={time}
-              style={[
-                styles.pickupTimeBtn,
-                selectedTime === time && styles.pickupTimeSelected,
-              ]}
+              style={[styles.pickupTimeBtn, selectedTime === time && styles.pickupTimeSelected]}
               onPress={() => setSelectedTime(time)}
             >
-              <Text
-                style={[
-                  styles.pickupTimeText,
-                  selectedTime === time && { color: "#fff", fontFamily: "Roboto_700Bold" },
-                ]}
-              >
+              <Text style={[styles.pickupTimeText, selectedTime === time && { color: "#fff", fontFamily: "Roboto_700Bold" }]}>
                 {time}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-
-        {/* Receipt-style total summary with icon */}
-        <View style={styles.totalSummary}>
-          <View style={styles.receiptHeader}>
-            <MaterialCommunityIcons name="receipt" size={22} color="#f97316" />
-            <Text style={styles.receiptTitle}>Order Summary</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalAmount}>₱{total.toFixed(2)}</Text>
-          </View>
-          <View style={styles.dottedDivider} />
-          <View style={styles.totalRow}>
-            <Text style={[styles.totalLabel, { fontSize: 18 }]}>Total</Text>
-            <Text style={[styles.totalAmount, { fontSize: 18, fontWeight: "700" }]}>₱{total.toFixed(2)}</Text>
-          </View>
-        </View>
       </View>
-    </>
+    </View>
   );
-
-  const handleProceed = () => {
-    if (!selectedTime) {
-      Alert.alert("Pickup Time Required", "Please select a pickup time before proceeding.");
-      return;
-    }
-    router.push({ pathname: "/cart/checkout", params: { total, selectedTime } });
-  };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <ImageBackground
-        source={require("../../../assets/drop_1.png")}
-        resizeMode="cover"
-        style={styles.headerBackground}
-      >
+      <ImageBackground source={require("../../../assets/drop_1.png")} resizeMode="cover" style={styles.headerBackground}>
         <View style={styles.overlay} />
         <View style={styles.headerContainer}>
           <View style={styles.headerTopRow}>
@@ -146,15 +139,87 @@ export default function CartScreen() {
         />
       )}
 
-      {/* Proceed to Payment button */}
       {total > 0 && (
         <TouchableOpacity style={styles.proceedBtn} onPress={handleProceed}>
           <Text style={styles.proceedText}>Proceed to Payment</Text>
         </TouchableOpacity>
       )}
+
+  {/* Dine-in / Takeout Modal */}
+<Modal
+  visible={showModal}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setShowModal(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <View style={styles.circleChoiceContainer}>
+        {/* Dine-in */}
+        <TouchableOpacity
+          onPress={() => {
+            setOrderType("dinein");
+            handleDineIn();
+          }}
+          style={[styles.circleBtn, orderType === "dinein" && styles.circleBtnSelected]}
+        >
+          <Image
+            source={require("../../../assets/dinein.png")}
+            style={styles.circleImage}
+          />
+          <Text
+            style={[styles.circleText, orderType === "dinein" && styles.circleTextSelected]}
+          >
+            DINE-IN
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.orText}>OR</Text>
+
+        {/* Takeout */}
+        <TouchableOpacity
+          onPress={() => {
+            setOrderType("takeout");
+            handleTakeout();
+          }}
+          style={[styles.circleBtn, orderType === "takeout" && styles.circleBtnSelected]}
+        >
+          <Image
+            source={require("../../../assets/takeout.png")}
+            style={styles.circleImage}
+          />
+          <Text
+            style={[styles.circleText, orderType === "takeout" && styles.circleTextSelected]}
+          >
+            TAKEOUT
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
+
+      {/* Full canteen modal */}
+      <Modal visible={showFullModal} transparent animationType="fade" onRequestClose={() => setShowFullModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.fullModalBox}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setShowFullModal(false)}>
+              <Text style={styles.closeButtonText}>✖</Text>
+            </TouchableOpacity>
+            <Text style={styles.fullModalText}>
+              Crowd levels are high! {"\n"}Finding a table may take a little longer than usual.
+            </Text>
+            <TouchableOpacity style={styles.takeoutBtn} onPress={handleTakeoutInstead}>
+              <Text style={styles.takeoutBtnText}>PROCEED WITH TAKEOUT</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fdfdfd" },
@@ -166,10 +231,21 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingBottom: 8,
   },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(254,192,117,0.5)" },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(254,192,117,0.5)",
+  },
   headerContainer: { paddingTop: 50, paddingBottom: 12, paddingHorizontal: 12 },
-  headerTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  headerTitle: { fontSize: 30, fontFamily: "Roboto_700Bold", color: "#1F2937" },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontSize: 30,
+    fontFamily: "Roboto_700Bold",
+    color: "#1F2937",
+  },
 
   card: {
     flexDirection: "row",
@@ -189,16 +265,37 @@ const styles = StyleSheet.create({
   image: { width: 60, height: 60, borderRadius: 10, marginRight: 14 },
   details: { flex: 1 },
   name: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333" },
-  price: { fontSize: 14, fontFamily: "Roboto_400Regular", color: "#777", marginVertical: 6 },
+  price: {
+    fontSize: 14,
+    fontFamily: "Roboto_400Regular",
+    color: "#777",
+    marginVertical: 6,
+  },
   controls: { flexDirection: "row", alignItems: "center" },
-  controlBtn: { backgroundColor: "#e67e22", padding: 6, borderRadius: 20, marginHorizontal: 6 },
-  qty: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333", minWidth: 20, textAlign: "center" },
+  controlBtn: {
+    backgroundColor: "#e67e22",
+    padding: 6,
+    borderRadius: 20,
+    marginHorizontal: 6,
+  },
+  qty: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    color: "#333",
+    minWidth: 20,
+    textAlign: "center",
+  },
   trashBtn: { padding: 8, borderRadius: 10, backgroundColor: "#fff5eb" },
 
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { marginTop: 12, fontSize: 18, fontFamily: "Roboto_400Regular", color: "#999" },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 18,
+    fontFamily: "Roboto_400Regular",
+    color: "#999",
+  },
 
-  addMoreBtn: { 
+  addMoreBtn: {
     backgroundColor: "#f97316",
     paddingVertical: 12,
     paddingHorizontal: 12,
@@ -208,15 +305,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  addMoreText: { 
-    fontSize: 16, 
-    fontFamily: "Roboto_700Bold", 
-    color: "#fff" 
+  addMoreText: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    color: "#fff",
   },
 
   pickupContainer: { paddingHorizontal: 12, marginVertical: 10 },
-  pickupLabel: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333", marginBottom: 6 },
-  pickupTimesRow: { flexDirection: "row", flexWrap: "wrap" },
+  pickupLabel: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    color: "#333",
+    marginBottom: 6,
+  },
   pickupTimeBtn: {
     borderWidth: 1,
     borderColor: "#f97316",
@@ -227,7 +328,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   pickupTimeSelected: { backgroundColor: "#f97316" },
-  pickupTimeText: { fontSize: 14, fontFamily: "Roboto_400Regular", color: "#333" },
+  pickupTimeText: {
+    fontSize: 14,
+    fontFamily: "Roboto_400Regular",
+    color: "#333",
+  },
 
   totalSummary: {
     marginTop: 12,
@@ -255,16 +360,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 4,
   },
-  totalLabel: {
-    fontSize: 16,
-    fontFamily: "Roboto_700Bold",
-    color: "#555",
-  },
-  totalAmount: {
-    fontSize: 16,
-    fontFamily: "Roboto_700Bold",
-    color: "#111",
-  },
+  totalLabel: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#555" },
+  totalAmount: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#111" },
   dottedDivider: {
     borderStyle: "dotted",
     borderWidth: 0.8,
@@ -284,5 +381,111 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 4,
   },
-  proceedText: { color: "#fff", fontFamily: "Roboto_700Bold", fontSize: 16 },
+  proceedText: {
+    color: "#fff",
+    fontFamily: "Roboto_700Bold",
+    fontSize: 16,
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(1,0.3,0.5,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  circleChoiceContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 10,
+  },
+  circleBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#f0f0f0",
+    marginHorizontal: 12,
+    elevation: 4,
+    borderWidth: 4,
+    borderColor: "black",
+  },
+  circleBtnSelected: {
+    borderColor: "#f97316",
+    backgroundColor: "#fff7f2",
+  },
+  circleImage: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+    marginBottom: 3,
+    transform: [{ scale: 1.1 }],
+  },
+  circleText: {
+    fontSize: 14,
+    fontFamily: "Roboto_700Bold",
+    color: "#333",
+  },
+  circleTextSelected: {
+    color: "#f97316",
+  },
+  orText: {
+    fontSize: 24,
+    fontFamily: "Roboto_700Bold",
+    color: "white",
+    marginHorizontal: 3,
+    alignSelf: "center",
+  },
+
+// 🚨 Full canteen modal
+fullModalBox: {
+  width: "80%",
+  backgroundColor: "white",
+  padding: 20,
+  borderRadius: 12,
+  alignItems: "center",
+  borderWidth: 5,          // 🔥 add border
+  borderColor: "#FF5151",      // 🔥 red border
+  borderStyle: "dashed",   // 🔥 dashed outline
+  position: "relative",    // for ❌ button positioning
+},
+fullModalText: {
+  textAlign: "center",
+  fontSize: 18,
+  marginBottom: 20,
+  fontFamily: "Roboto_700Bold",
+},
+takeoutBtn: {
+  marginTop: 15,
+  backgroundColor: "#FF5151", 
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  borderRadius: 8,
+  alignItems: "center",
+  justifyContent: "center",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 3, 
+},
+takeoutBtnText: {
+  color: "white",         
+  fontSize: 16,
+  fontWeight: "bold",
+  fontFamily: "Roboto_700Bold",
+},
+closeButton: {
+  position: "absolute",
+  top: 2,
+  right: 10,
+  padding: 5,
+},
+closeButtonText: {
+  fontSize: 30,
+  color: "#C00F0C",
+  fontWeight: "bold",
+},
 });

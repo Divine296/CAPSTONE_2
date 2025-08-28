@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+// app/(tabs)/PaymentPage.jsx
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
-  Alert,
   Image,
-  Animated,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
@@ -17,6 +17,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { orderType, total, selectedTime } = useLocalSearchParams();
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   let [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
   if (!fontsLoaded) return null;
@@ -34,17 +35,18 @@ export default function PaymentPage() {
 
   const handlePaymentSelect = (method) => {
     setSelectedPayment(method);
-    Alert.alert(
-      "Payment Selected",
-      `You chose ${method.toUpperCase()} for your ${orderType.toUpperCase()} order.\nTotal: ₱${parseFloat(total).toFixed(
-        2
-      )}\nPickup Time: ${selectedTime}`
-    );
+    setShowSuccess(true);
+
+    // Auto close popup & go to Orders.jsx after 5s
+    setTimeout(() => {
+      setShowSuccess(false);
+      router.push("/(tabs)/orders"); // 👈 adjust path if different
+    }, 5000);
   };
 
   return (
     <View style={styles.container}>
-      {/* Header remains untouched */}
+      {/* Header */}
       <ImageBackground
         source={require("../../../assets/drop_1.png")}
         resizeMode="cover"
@@ -62,11 +64,10 @@ export default function PaymentPage() {
         </View>
       </ImageBackground>
 
-      {/* Receipt-style Order Summary */}
+      {/* Receipt */}
       <View style={styles.receiptCard}>
         <Text style={styles.receiptHeader}>Order Receipt</Text>
         <View style={styles.line} />
-
         <View style={styles.receiptRow}>
           <Text style={styles.label}>Order Type</Text>
           <Text style={styles.value}>{orderType.toUpperCase()}</Text>
@@ -84,7 +85,7 @@ export default function PaymentPage() {
         </View>
       </View>
 
-      {/* Payment Options */}
+      {/* Payment Buttons */}
       <TouchableOpacity
         style={[
           styles.paymentBtn,
@@ -114,6 +115,21 @@ export default function PaymentPage() {
         />
         <Text style={styles.paymentText}>Pay at Counter</Text>
       </TouchableOpacity>
+
+      {/* ✅ Success Popup */}
+      <Modal transparent visible={showSuccess} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Image
+              source={require("../../../assets/check.png")} // ✅ burger check icon
+              style={{ width: 90, height: 90, marginBottom: 20 }}
+              resizeMode="contain"
+            />
+            <Text style={styles.successText}>Payment Successful!</Text>
+            <Text style={styles.redirectText}>Redirecting to Orders...</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -133,7 +149,6 @@ const styles = StyleSheet.create({
   headerTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   headerTitle: { fontSize: 28, fontFamily: "Roboto_700Bold", color: "#1F2937" },
 
-  // Receipt-style card
   receiptCard: {
     width: "90%",
     backgroundColor: "#fff",
@@ -149,11 +164,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   receiptHeader: { fontSize: 20, fontFamily: "Roboto_700Bold", marginBottom: 12, color: "#333" },
-  receiptRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
+  receiptRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   label: { fontSize: 16, fontFamily: "Roboto_400Regular", color: "#555" },
   value: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333" },
   line: { borderBottomColor: "#ccc", borderBottomWidth: 1, marginVertical: 8 },
@@ -161,8 +172,8 @@ const styles = StyleSheet.create({
   paymentBtn: {
     flexDirection: "row",
     alignItems: "center",
-    width: "85%", // slightly smaller
-    paddingVertical: 14, // smaller padding
+    width: "85%",
+    paddingVertical: 14,
     borderRadius: 16,
     justifyContent: "center",
     marginVertical: 8,
@@ -175,13 +186,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   selectedBtn: {
-    backgroundColor: "#ffe5cc", // soft orange background
+    backgroundColor: "#ffe5cc",
     shadowColor: "#ff944d",
     shadowOpacity: 0.9,
     elevation: 6,
   },
   paymentText: { color: "#333", fontFamily: "Roboto_700Bold", fontSize: 16, marginLeft: 12 },
-  icon: { width: 60, height: 40 }, // bigger but not cropped
+  icon: { width: 60, height: 40 },
 
   errorText: {
     fontSize: 18,
@@ -201,4 +212,33 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   backBtnText: { color: "#fff", fontFamily: "Roboto_700Bold", fontSize: 16 },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+    width: "75%",
+  },
+  successText: {
+    fontSize: 20,
+    fontFamily: "Roboto_700Bold",
+    color: "#22c55e",
+    marginBottom: 8,
+  },
+  redirectText: {
+    fontSize: 14,
+    fontFamily: "Roboto_400Regular",
+    color: "#555",
+  },
 });

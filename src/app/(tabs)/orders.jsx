@@ -11,61 +11,50 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCart } from "../../context/CartContext";
-
-// ✅ Import fonts (must stay at top of component)
-import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { useFonts, Roboto_700Bold, Roboto_400Regular } from "@expo-google-fonts/roboto";
 
 export default function OrdersScreen() {
-  // ✅ Always first hook call
   const [fontsLoaded] = useFonts({
     Roboto_700Bold,
+    Roboto_400Regular,
   });
 
   const router = useRouter();
   const { cart } = useCart();
 
-  if (!fontsLoaded) {
-    return null; // Show nothing or loader until fonts are ready
-  }
+  if (!fontsLoaded) return null;
 
-  // Group orders
   const todaysOrders = cart.filter((item) => item.status === "ongoing");
   const historyOrders = cart.filter((item) => item.status === "completed");
 
-  // Renders a grouped order card
   const renderGroupedCard = (items, title, isHistory = false) => (
     <View style={styles.card}>
-      {/* Header */}
       <View style={styles.headerBar}>
         <Text style={styles.headerText}>
           {title} • Order ID: D{Math.floor(Math.random() * 9999)}
         </Text>
       </View>
 
-      {/* Items */}
       {items.map((item, idx) => (
         <View key={idx} style={styles.itemRow}>
           <Image source={item.image} style={styles.itemImage} />
           <View style={styles.itemInfo}>
             <Text style={styles.itemName}>{item.name}</Text>
             {item.size && <Text style={styles.itemDetail}>Size: {item.size}</Text>}
-            {item.customize && (
-              <Text style={styles.itemDetail}>Customize: {item.customize}</Text>
-            )}
+            {item.customize && <Text style={styles.itemDetail}>Customize: {item.customize}</Text>}
             <Text style={styles.itemDetail}>Qty: {item.quantity}</Text>
           </View>
           <Text style={styles.price}>₱{item.price}</Text>
         </View>
       ))}
 
-      {/* Bottom button */}
       {!isHistory && (
         <TouchableOpacity
           style={styles.detailsButton}
           onPress={() =>
             router.push({
               pathname: "/orderStatus",
-              params: { order: JSON.stringify(items) }, // pass order items
+              params: { order: JSON.stringify(items) },
             })
           }
         >
@@ -78,7 +67,6 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <ImageBackground
         source={require("../../../assets/drop_1.png")}
         resizeMode="cover"
@@ -94,7 +82,6 @@ export default function OrdersScreen() {
         </View>
       </ImageBackground>
 
-      {/* Orders list */}
       <FlatList
         data={historyOrders}
         keyExtractor={(item, index) => "history-" + index}
@@ -114,11 +101,11 @@ export default function OrdersScreen() {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="cart-outline" size={50} color="#aaa" />
+            <Ionicons name="cart-outline" size={80} color="#ccc" />
             <Text style={styles.emptyText}>No orders yet</Text>
           </View>
         }
-        contentContainerStyle={{ padding: 14 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 14 }}
       />
     </View>
   );
@@ -127,7 +114,6 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fdfdfd" },
 
-  // Top header
   topBackground: {
     width: "100%",
     paddingBottom: 10,
@@ -147,20 +133,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  pageTitle: { fontSize: 30, fontFamily: "Roboto_700Bold", color: "black" },
 
-  // ✅ Roboto 700 Bold for title
-  pageTitle: { fontSize: 24, fontFamily: "Roboto_700Bold", color: "#1F2937" },
-
-  // Sections
   sectionTitle: {
     fontSize: 16,
-    fontFamily: "Roboto_700Bold", // ✅ fixed to use Roboto Bold too
+    fontFamily: "Roboto_700Bold",
     color: "#374151",
     marginBottom: 10,
     marginLeft: 6,
   },
 
-  // Order card
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -202,6 +184,17 @@ const styles = StyleSheet.create({
   },
   detailsText: { color: "red", fontSize: 14, marginLeft: 4, fontWeight: "600" },
 
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { fontSize: 18, color: "#999", marginTop: 10 },
+emptyContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingBottom: 5, // ensures it's visually aligned like CartScreen
+},
+
+  emptyText: {
+    marginTop: 5,
+    fontSize: 18,
+    fontFamily: "Roboto_400Regular",
+    color: "#999",
+  },
 });

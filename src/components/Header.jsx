@@ -1,3 +1,4 @@
+// app/components/Header.jsx
 import React from "react";
 import {
   View,
@@ -8,35 +9,49 @@ import {
   StyleSheet,
 } from "react-native";
 import { Bell, Settings, Search } from "lucide-react-native";
+import { useFonts, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { useNotifications } from "../context/NotificationContext";
 
-export default function Header() {
+export default function Header({ onToggleDropdown }) {
+  const { notifications } = useNotifications();
+  const [fontsLoaded] = useFonts({ Roboto_700Bold });
+  if (!fontsLoaded) return null;
+
   return (
     <ImageBackground
       source={require("../../assets/drop_1.png")}
       resizeMode="cover"
       style={styles.imageBackground}
     >
-      {/* Semi-transparent orange overlay */}
       <View style={styles.overlay} />
-
       <View style={styles.container}>
-        {/* Top row: Home + Icons */}
+        {/* Top row */}
         <View style={styles.topRow}>
-          {/* Left: Home */}
-          <View style={styles.homeRow}>
-            <Text style={styles.homeText}>Home</Text>
-          </View>
+          <Text style={[styles.homeText, { fontFamily: "Roboto_700Bold" }]}>
+            Home
+          </Text>
 
-          {/* Right: Bell + Settings */}
           <View style={styles.iconsRow}>
-            <TouchableOpacity style={styles.bellContainer}>
+            {/* 🔔 Notifications */}
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => onToggleDropdown("notifications")}
+            >
               <Bell size={26} color="black" />
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationText}>3</Text>
-              </View>
+              {notifications.length > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationText}>
+                    {notifications.length}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            {/* ⚙️ Settings */}
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => onToggleDropdown("settings")}
+            >
               <Settings size={26} color="black" />
             </TouchableOpacity>
           </View>
@@ -69,44 +84,35 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(254,192,117,0.5)",
   },
   container: {
-    paddingTop: 48,
+    paddingTop: 30,
     paddingBottom: 18,
-    paddingHorizontal: 0,
   },
   topRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
     marginHorizontal: 12,
     marginBottom: 22,
   },
-  homeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   homeText: {
     fontSize: 30,
-    fontWeight: "900",
     color: "black",
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   iconsRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  bellContainer: {
-    marginRight: 16,
+  iconButton: {
+    marginLeft: 16,
   },
   notificationBadge: {
     position: "absolute",
     top: -4,
     right: -4,
     backgroundColor: "red",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -123,11 +129,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   searchInput: {
     flex: 1,

@@ -10,8 +10,9 @@ import {
   ScrollView,
   Alert,
   Modal,
+  ActivityIndicator,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useCart } from "../../context/CartContext";
 import { useRouter } from "expo-router";
 import {
@@ -23,18 +24,20 @@ import {
 export default function CartScreen() {
   const router = useRouter();
   const { cart, removeFromCart, increaseQuantity, decreaseQuantity } = useCart();
+
+  // Hooks must always be declared at top level
   const [selectedTime, setSelectedTime] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showFullModal, setShowFullModal] = useState(false);
   const [orderType, setOrderType] = useState(null);
-  
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  let [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
-  if (!fontsLoaded) return null;
+  const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
+
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const pickupTimes = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM"];
 
+  // Functions
   const handleProceed = () => {
     if (!selectedTime) {
       Alert.alert("Pickup Time Required", "Please select a pickup time before proceeding.");
@@ -44,7 +47,9 @@ export default function CartScreen() {
   };
 
   const handleTakeout = () => {
-    router.push(`/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`);
+    router.push(
+      `/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`
+    );
   };
 
   const handleDineIn = () => {
@@ -53,13 +58,17 @@ export default function CartScreen() {
       setShowModal(false);
       setShowFullModal(true);
     } else {
-      router.push(`/cart/payment?orderType=dinein&total=${total}&selectedTime=${selectedTime}`);
+      router.push(
+        `/cart/payment?orderType=dinein&total=${total}&selectedTime=${selectedTime}`
+      );
     }
   };
 
   const handleTakeoutInstead = () => {
     setShowFullModal(false);
-    router.push(`/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`);
+    router.push(
+      `/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`
+    );
   };
 
   const renderItem = ({ item }) => (
@@ -98,7 +107,12 @@ export default function CartScreen() {
               style={[styles.pickupTimeBtn, selectedTime === time && styles.pickupTimeSelected]}
               onPress={() => setSelectedTime(time)}
             >
-              <Text style={[styles.pickupTimeText, selectedTime === time && { color: "#fff", fontFamily: "Roboto_700Bold" }]}>
+              <Text
+                style={[
+                  styles.pickupTimeText,
+                  selectedTime === time && { color: "#fff", fontFamily: "Roboto_700Bold" },
+                ]}
+              >
                 {time}
               </Text>
             </TouchableOpacity>
@@ -108,9 +122,21 @@ export default function CartScreen() {
     </View>
   );
 
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#f97316" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <ImageBackground source={require("../../../assets/drop_1.png")} resizeMode="cover" style={styles.headerBackground}>
+      <ImageBackground
+        source={require("../../../assets/drop_1.png")}
+        resizeMode="cover"
+        style={styles.headerBackground}
+      >
         <View style={styles.overlay} />
         <View style={styles.headerContainer}>
           <View style={styles.headerTopRow}>
@@ -145,70 +171,64 @@ export default function CartScreen() {
         </TouchableOpacity>
       )}
 
-  {/* Dine-in / Takeout Modal */}
-<Modal
-  visible={showModal}
-  transparent
-  animationType="fade"
-  onRequestClose={() => setShowModal(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <View style={styles.circleChoiceContainer}>
-        {/* Dine-in */}
-        <TouchableOpacity
-          onPress={() => {
-            setOrderType("dinein");
-            handleDineIn();
-          }}
-          style={[styles.circleBtn, orderType === "dinein" && styles.circleBtnSelected]}
-        >
-          <Image
-            source={require("../../../assets/dinein.png")}
-            style={styles.circleImage}
-          />
-          <Text
-            style={[styles.circleText, orderType === "dinein" && styles.circleTextSelected]}
-          >
-            DINE-IN
-          </Text>
-        </TouchableOpacity>
+      {/* Dine-in / Takeout Modal */}
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={{ alignItems: "center" }}>
+            <View style={styles.circleChoiceContainer}>
+              {/* Dine-in */}
+              <TouchableOpacity
+                onPress={() => {
+                  setOrderType("dinein");
+                  handleDineIn();
+                }}
+                style={[styles.circleBtn, orderType === "dinein" && styles.circleBtnSelected]}
+              >
+                <Image source={require("../../../assets/dinein.png")} style={styles.circleImage} />
+                <Text style={[styles.circleText, orderType === "dinein" && styles.circleTextSelected]}>
+                  DINE-IN
+                </Text>
+              </TouchableOpacity>
 
-        <Text style={styles.orText}>OR</Text>
+              <Text style={styles.orText}>OR</Text>
 
-        {/* Takeout */}
-        <TouchableOpacity
-          onPress={() => {
-            setOrderType("takeout");
-            handleTakeout();
-          }}
-          style={[styles.circleBtn, orderType === "takeout" && styles.circleBtnSelected]}
-        >
-          <Image
-            source={require("../../../assets/takeout.png")}
-            style={styles.circleImage}
-          />
-          <Text
-            style={[styles.circleText, orderType === "takeout" && styles.circleTextSelected]}
-          >
-            TAKEOUT
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-
+              {/* Takeout */}
+              <TouchableOpacity
+                onPress={() => {
+                  setOrderType("takeout");
+                  handleTakeout();
+                }}
+                style={[styles.circleBtn, orderType === "takeout" && styles.circleBtnSelected]}
+              >
+                <Image source={require("../../../assets/takeout.png")} style={styles.circleImage} />
+                <Text style={[styles.circleText, orderType === "takeout" && styles.circleTextSelected]}>
+                  TAKEOUT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Full canteen modal */}
-      <Modal visible={showFullModal} transparent animationType="fade" onRequestClose={() => setShowFullModal(false)}>
+      <Modal
+        visible={showFullModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowFullModal(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.fullModalBox}>
             <TouchableOpacity style={styles.closeButton} onPress={() => setShowFullModal(false)}>
               <Text style={styles.closeButtonText}>✖</Text>
             </TouchableOpacity>
             <Text style={styles.fullModalText}>
-              Crowd levels are high! {"\n"}Finding a table may take a little longer than usual.
+              ⚠️ Crowd levels are high! {"\n"}Finding a table may take a little longer than usual.
             </Text>
             <TouchableOpacity style={styles.takeoutBtn} onPress={handleTakeoutInstead}>
               <Text style={styles.takeoutBtnText}>PROCEED WITH TAKEOUT</Text>
@@ -219,7 +239,6 @@ export default function CartScreen() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fdfdfd" },
@@ -235,7 +254,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(254,192,117,0.5)",
   },
-  headerContainer: { paddingTop: 50, paddingBottom: 12, paddingHorizontal: 12 },
+  headerContainer: { paddingTop: 50, paddingBottom: 14, paddingHorizontal: 14 },
   headerTopRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -244,7 +263,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 30,
     fontFamily: "Roboto_700Bold",
-    color: "#1F2937",
+    color: "black",
   },
 
   card: {
@@ -289,7 +308,7 @@ const styles = StyleSheet.create({
 
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyText: {
-    marginTop: 12,
+    marginTop: 5,
     fontSize: 18,
     fontFamily: "Roboto_400Regular",
     color: "#999",
@@ -334,41 +353,6 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
-  totalSummary: {
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  receiptHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  receiptTitle: {
-    fontSize: 16,
-    fontFamily: "Roboto_700Bold",
-    color: "#f97316",
-    marginLeft: 6,
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 4,
-  },
-  totalLabel: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#555" },
-  totalAmount: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#111" },
-  dottedDivider: {
-    borderStyle: "dotted",
-    borderWidth: 0.8,
-    borderColor: "#ccc",
-    marginVertical: 6,
-  },
-
   proceedBtn: {
     position: "absolute",
     bottom: 20,
@@ -390,7 +374,7 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(1,0.3,0.5,0.5)",
+    backgroundColor: "rgba(1,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -438,54 +422,60 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     alignSelf: "center",
   },
+  crowdText: {
+    fontSize: 18,
+    fontFamily: "Roboto_700Bold",
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "center",
+  },
 
-// 🚨 Full canteen modal
-fullModalBox: {
-  width: "80%",
-  backgroundColor: "white",
-  padding: 20,
-  borderRadius: 12,
-  alignItems: "center",
-  borderWidth: 5,          // 🔥 add border
-  borderColor: "#FF5151",      // 🔥 red border
-  borderStyle: "dashed",   // 🔥 dashed outline
-  position: "relative",    // for ❌ button positioning
-},
-fullModalText: {
-  textAlign: "center",
-  fontSize: 18,
-  marginBottom: 20,
-  fontFamily: "Roboto_700Bold",
-},
-takeoutBtn: {
-  marginTop: 15,
-  backgroundColor: "#FF5151", 
-  paddingVertical: 12,
-  paddingHorizontal: 24,
-  borderRadius: 8,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 3, 
-},
-takeoutBtnText: {
-  color: "white",         
-  fontSize: 16,
-  fontWeight: "bold",
-  fontFamily: "Roboto_700Bold",
-},
-closeButton: {
-  position: "absolute",
-  top: 2,
-  right: 10,
-  padding: 5,
-},
-closeButtonText: {
-  fontSize: 30,
-  color: "#C00F0C",
-  fontWeight: "bold",
-},
+  fullModalBox: {
+    width: "80%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 5,
+    borderColor: "#FF5151",
+    borderStyle: "dashed",
+    position: "relative",
+  },
+  fullModalText: {
+    textAlign: "center",
+    fontSize: 18,
+    marginBottom: 20,
+    fontFamily: "Roboto_700Bold",
+  },
+  takeoutBtn: {
+    marginTop: 15,
+    backgroundColor: "#FF5151",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  takeoutBtnText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "Roboto_700Bold",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 2,
+    right: 10,
+    padding: 5,
+  },
+  closeButtonText: {
+    fontSize: 30,
+    color: "#C00F0C",
+    fontWeight: "bold",
+  },
 });

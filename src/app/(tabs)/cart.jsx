@@ -25,10 +25,8 @@ export default function CartScreen() {
   const router = useRouter();
   const { cart, removeFromCart, increaseQuantity, decreaseQuantity } = useCart();
 
-  // Hooks must always be declared at top level
   const [selectedTime, setSelectedTime] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showFullModal, setShowFullModal] = useState(false);
   const [orderType, setOrderType] = useState(null);
 
   const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
@@ -37,7 +35,6 @@ export default function CartScreen() {
 
   const pickupTimes = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM"];
 
-  // Functions
   const handleProceed = () => {
     if (!selectedTime) {
       Alert.alert("Pickup Time Required", "Please select a pickup time before proceeding.");
@@ -53,21 +50,8 @@ export default function CartScreen() {
   };
 
   const handleDineIn = () => {
-    const isFull = true; // replace with real backend check
-    if (isFull) {
-      setShowModal(false);
-      setShowFullModal(true);
-    } else {
-      router.push(
-        `/cart/payment?orderType=dinein&total=${total}&selectedTime=${selectedTime}`
-      );
-    }
-  };
-
-  const handleTakeoutInstead = () => {
-    setShowFullModal(false);
     router.push(
-      `/cart/payment?orderType=takeout&total=${total}&selectedTime=${selectedTime}`
+      `/cart/payment?orderType=dinein&total=${total}&selectedTime=${selectedTime}`
     );
   };
 
@@ -214,28 +198,6 @@ export default function CartScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Full canteen modal */}
-      <Modal
-        visible={showFullModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowFullModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.fullModalBox}>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setShowFullModal(false)}>
-              <Text style={styles.closeButtonText}>✖</Text>
-            </TouchableOpacity>
-            <Text style={styles.fullModalText}>
-              ⚠️ Crowd levels are high! {"\n"}Finding a table may take a little longer than usual.
-            </Text>
-            <TouchableOpacity style={styles.takeoutBtn} onPress={handleTakeoutInstead}>
-              <Text style={styles.takeoutBtnText}>PROCEED WITH TAKEOUT</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -371,7 +333,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(1,0,0,0.5)",
@@ -421,61 +382,5 @@ const styles = StyleSheet.create({
     color: "white",
     marginHorizontal: 3,
     alignSelf: "center",
-  },
-  crowdText: {
-    fontSize: 18,
-    fontFamily: "Roboto_700Bold",
-    color: "#fff",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-
-  fullModalBox: {
-    width: "80%",
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 5,
-    borderColor: "#FF5151",
-    borderStyle: "dashed",
-    position: "relative",
-  },
-  fullModalText: {
-    textAlign: "center",
-    fontSize: 18,
-    marginBottom: 20,
-    fontFamily: "Roboto_700Bold",
-  },
-  takeoutBtn: {
-    marginTop: 15,
-    backgroundColor: "#FF5151",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  takeoutBtnText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "Roboto_700Bold",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 2,
-    right: 10,
-    padding: 5,
-  },
-  closeButtonText: {
-    fontSize: 30,
-    color: "#C00F0C",
-    fontWeight: "bold",
   },
 });

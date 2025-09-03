@@ -15,22 +15,22 @@ export default function CategoryItem({ image, title, onPress }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FF6600", // ✅ solid orange
+    backgroundColor: "#FF6600",
     borderRadius: 16,
     alignItems: "center",
-    paddingVertical: 16,
+    paddingVertical: 10,
     marginHorizontal: 4,
   },
   iconContainer: {
-    marginBottom: 2, // ⬅️ reduced spacing between icon and text
+    marginBottom: 2,
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "900", // ✅ bold text
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold", 
     color: "#fff",
     textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.25)",

@@ -21,7 +21,7 @@ export default function Categories() {
           onPress={() => alert(`Selected: ${item.title}`)}
         />
       )}
-      numColumns={2} // ✅ only 2 per row
+      numColumns={2} 
       columnWrapperStyle={styles.row}
       contentContainerStyle={styles.list}
       showsVerticalScrollIndicator={false}

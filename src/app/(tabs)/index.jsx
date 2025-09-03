@@ -23,13 +23,13 @@ const categoriesData = [
   { id: "3", title: "Snacks", image: require("../../../assets/choices/snacks.png") },
   { id: "4", title: "Drinks", image: require("../../../assets/choices/drinks.png") },
 ];
-
+ 
 export default function Home() {
   const [fontsLoaded] = useFonts({ Roboto_700Bold });
   const router = useRouter();
   const { notifications } = useNotifications();
 
-  const [openDropdown, setOpenDropdown] = useState(null); // "notifications" | "settings" | null
+  const [openDropdown, setOpenDropdown] = useState(null); 
 
   if (!fontsLoaded) return null;
 

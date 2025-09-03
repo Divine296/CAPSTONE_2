@@ -12,21 +12,24 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import {
+  useFonts,
+  Roboto_400Regular,
+  Roboto_700Bold,
+} from "@expo-google-fonts/roboto";
 import { useCart } from "../../../context/CartContext";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 40) / 2;
 
 const snacks = [
-  { id: "1", name: "Binignit", price: 25, image: "https://via.placeholder.com/150" },
-  { id: "2", name: "Turon", price: 20, image: "https://via.placeholder.com/150" },
-  // Add more items here
+  { id: "s1", name: "Binignit", price: 25, image: "https://via.placeholder.com/150" },
+  { id: "s2", name: "Turon", price: 20, image: "https://via.placeholder.com/150" },
 ];
 
 export default function SnacksScreen() {
   const router = useRouter();
-  const { cart, addToCart, removeFromCart, increaseQuantity, decreaseQuantity } = useCart();
+  const { cart, addToCart, decreaseQuantity } = useCart();
 
   let [fontsLoaded] = useFonts({
     Roboto_400Regular,
@@ -67,6 +70,14 @@ export default function SnacksScreen() {
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  const handleCheckout = () => {
+    router.push("/cart");
+  };
+
+  const handleAddMoreItems = () => {
+    router.push("/(tabs)");
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -96,18 +107,25 @@ export default function SnacksScreen() {
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between" }}
-        contentContainerStyle={{ padding: 12, paddingBottom: 100 }}
+        contentContainerStyle={{
+          padding: 12,
+          paddingBottom: total > 0 ? 130 : 50, // leave space for buttons
+        }}
       />
 
-      {/* Floating Cart */}
       {total > 0 && (
-        <TouchableOpacity
-          style={styles.floatingCart}
-          onPress={() => router.push("/cart")}
-        >
-          <Ionicons name="cart-outline" size={22} color="#fff" />
-          <Text style={styles.cartText}>₱{total} • Checkout</Text>
-        </TouchableOpacity>
+        <View style={styles.floatingContainer}>
+          {/* Checkout Button */}
+          <TouchableOpacity style={styles.floatingCart} onPress={handleCheckout}>
+            <Ionicons name="cart-outline" size={22} color="#fff" />
+            <Text style={styles.cartText}>₱{total} • Checkout</Text>
+          </TouchableOpacity>
+
+          {/* Add More Items Button */}
+          <TouchableOpacity style={styles.addMoreBtn} onPress={handleAddMoreItems}>
+            <Text style={styles.addMoreText}>+ Add More Items</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -122,10 +140,21 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingBottom: 8,
   },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(254,192,117,0.5)" },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(254,192,117,0.5)",
+  },
   headerContainer: { paddingTop: 50, paddingBottom: 12, paddingHorizontal: 12 },
-  headerTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  headerTitle: { fontSize: 30, fontFamily: "Roboto_700Bold", color: "#1F2937" },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontSize: 30,
+    fontFamily: "Roboto_700Bold",
+    color: "#1F2937",
+  },
 
   card: {
     backgroundColor: "#fff",
@@ -142,25 +171,74 @@ const styles = StyleSheet.create({
     borderColor: "#f97316",
   },
   image: { width: "100%", height: 100, borderRadius: 8, marginBottom: 8 },
-  name: { fontSize: 16, fontFamily: "Roboto_700Bold", textAlign: "center", color: "#333", marginBottom: 4 },
-  price: { fontSize: 14, fontFamily: "Roboto_400Regular", color: "#777", marginBottom: 8 },
+  name: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    textAlign: "center",
+    color: "#333",
+    marginBottom: 4,
+  },
+  price: {
+    fontSize: 14,
+    fontFamily: "Roboto_400Regular",
+    color: "#777",
+    marginBottom: 8,
+  },
 
-  controls: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 6 },
-  controlBtn: { backgroundColor: "#e67e22", padding: 6, borderRadius: 20, marginHorizontal: 6 },
-  qty: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333", minWidth: 20, textAlign: "center" },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 6,
+  },
+  controlBtn: {
+    backgroundColor: "#e67e22",
+    padding: 6,
+    borderRadius: 20,
+    marginHorizontal: 6,
+  },
+  qty: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    color: "#333",
+    minWidth: 20,
+    textAlign: "center",
+  },
 
-  floatingCart: {
+  floatingContainer: {
     position: "absolute",
     bottom: 20,
     left: 20,
     right: 20,
+    gap: 10,
+  },
+  floatingCart: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#27ae60",
+    backgroundColor: "#FF8C00",
     paddingVertical: 14,
     borderRadius: 30,
     elevation: 4,
   },
-  cartText: { color: "#fff", fontFamily: "Roboto_700Bold", marginLeft: 8, fontSize: 16 },
+  cartText: {
+    color: "#fff",
+    fontFamily: "Roboto_700Bold",
+    marginLeft: 8,
+    fontSize: 16,
+  },
+
+  addMoreBtn: {
+    backgroundColor: "#27ae60",
+    paddingVertical: 12,
+    borderRadius: 30,
+    width: "100%",
+    alignItems: "center",
+    elevation: 3,
+  },
+  addMoreText: {
+    color: "#fff",
+    fontFamily: "Roboto_700Bold",
+    fontSize: 16,
+  },
 });

@@ -1,4 +1,3 @@
-// context/NotificationContext.jsx
 import React, { createContext, useContext, useState } from "react";
 
 const NotificationContext = createContext();
@@ -24,3 +23,4 @@ export const NotificationProvider = ({ children }) => {
 };
 
 export const useNotifications = () => useContext(NotificationContext);
+ 

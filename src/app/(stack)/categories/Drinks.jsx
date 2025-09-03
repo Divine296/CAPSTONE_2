@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+// Drinks.jsx
+import React from "react";
 import {
   View,
   Text,
   FlatList,
+  Image,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -10,10 +12,15 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
-import { useCart } from "../../../context/CartContext"; // ✅ Import your global cart
+import {
+  useFonts,
+  Roboto_400Regular,
+  Roboto_700Bold,
+} from "@expo-google-fonts/roboto";
+import { useCart } from "../../../context/CartContext";
 
 const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 40) / 2;
 
 const drinks = [
   { id: "d1", name: "Water 350ml", price: 10 },
@@ -26,54 +33,40 @@ const drinks = [
   { id: "d8", name: "Yakult", price: 15 },
 ];
 
-export default function Drinks() {
+export default function DrinksScreen() {
   const router = useRouter();
-  const { addToCart } = useCart(); // ✅ Use global cart
-  const [qtyMap, setQtyMap] = useState({});
+  const { cart, addToCart, decreaseQuantity } = useCart();
 
-  const [fontsLoaded] = useFonts({
+  let [fontsLoaded] = useFonts({
     Roboto_400Regular,
     Roboto_700Bold,
   });
+
   if (!fontsLoaded) return null;
 
-  const increaseQty = (item) => {
-    setQtyMap((prev) => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
-  };
-
-  const decreaseQty = (item) => {
-    setQtyMap((prev) => {
-      const newQty = (prev[item.id] || 0) - 1;
-      return { ...prev, [item.id]: newQty > 0 ? newQty : 0 };
-    });
-  };
-
-  const handleCheckout = () => {
-    Object.entries(qtyMap).forEach(([itemId, qty]) => {
-      const item = drinks.find((d) => d.id === itemId);
-      for (let i = 0; i < qty; i++) {
-        addToCart(item); // ✅ Add to global cart
-      }
-    });
-    router.push("/cart"); // Go to CartScreen
-  };
-
   const renderItem = ({ item }) => {
-    const qty = qtyMap[item.id] || 0;
+    const qty = cart.find((i) => i.id === item.id)?.quantity || 0;
 
     return (
       <View style={styles.card}>
+        <Image source={{ uri: item.image }} style={styles.image} />
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>₱{item.price}</Text>
 
         <View style={styles.controls}>
-          <TouchableOpacity style={styles.controlBtn} onPress={() => decreaseQty(item)}>
+          <TouchableOpacity
+            style={styles.controlBtn}
+            onPress={() => decreaseQuantity(item.id)}
+          >
             <Ionicons name="remove" size={18} color="#fff" />
           </TouchableOpacity>
 
           <Text style={styles.qty}>{qty}</Text>
 
-          <TouchableOpacity style={styles.controlBtn} onPress={() => increaseQty(item)}>
+          <TouchableOpacity
+            style={styles.controlBtn}
+            onPress={() => addToCart(item)}
+          >
             <Ionicons name="add" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -81,13 +74,19 @@ export default function Drinks() {
     );
   };
 
-  const totalPrice = Object.entries(qtyMap).reduce((sum, [itemId, qty]) => {
-    const item = drinks.find((d) => d.id === itemId);
-    return sum + item.price * qty;
-  }, 0);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const handleCheckout = () => {
+    router.push("/cart");
+  };
+
+  const handleAddMoreItems = () => {
+    router.push("/(tabs)");
+  };
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <ImageBackground
         source={require("../../../../assets/drop_1.png")}
         resizeMode="cover"
@@ -99,41 +98,69 @@ export default function Drinks() {
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={26} color="black" />
             </TouchableOpacity>
+
             <Text style={styles.headerTitle}>Drinks</Text>
-            <Ionicons name="fast-food-outline" size={26} color="black" />
+
+            <Ionicons name="wine-outline" size={26} color="black" />
           </View>
         </View>
       </ImageBackground>
 
+      {/* Drinks List */}
       <FlatList
         data={drinks}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between" }}
-        contentContainerStyle={{ padding: 12, paddingBottom: 100 }}
+        contentContainerStyle={{
+          padding: 12,
+          paddingBottom: total > 0 ? 130 : 50, // space for buttons
+        }}
       />
 
-      {/* Floating Cart */}
-      {totalPrice > 0 && (
-        <TouchableOpacity style={styles.floatingCart} onPress={handleCheckout}>
-          <Ionicons name="cart-outline" size={22} color="#fff" />
-          <Text style={styles.cartText}>₱{totalPrice} • Checkout</Text>
-        </TouchableOpacity>
+      {total > 0 && (
+        <View style={styles.floatingContainer}>
+          {/* Checkout Button */}
+          <TouchableOpacity style={styles.floatingCart} onPress={handleCheckout}>
+            <Ionicons name="cart-outline" size={22} color="#fff" />
+            <Text style={styles.cartText}>₱{total} • Checkout</Text>
+          </TouchableOpacity>
+
+          {/* Add More Items Button */}
+          <TouchableOpacity style={styles.addMoreBtn} onPress={handleAddMoreItems}>
+            <Text style={styles.addMoreText}>+ Add More Items</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
 }
 
-const CARD_WIDTH = (width - 40) / 2;
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fdfdfd" },
-  headerBackground: { width: "100%", borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: "hidden", paddingBottom: 8 },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(254,192,117,0.5)" },
+  headerBackground: {
+    width: "100%",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: "hidden",
+    paddingBottom: 8,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(254,192,117,0.5)",
+  },
   headerContainer: { paddingTop: 50, paddingBottom: 12, paddingHorizontal: 12 },
-  headerTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  headerTitle: { fontSize: 30, fontFamily: "Roboto_700Bold", color: "#1F2937", textAlign: "center", flex: 1, marginHorizontal: 10 },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontSize: 30,
+    fontFamily: "Roboto_700Bold",
+    color: "#1F2937",
+  },
 
   card: {
     backgroundColor: "#fff",
@@ -149,12 +176,75 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#f97316",
   },
-  name: { fontSize: 16, fontFamily: "Roboto_700Bold", color: "#333", marginBottom: 4, textAlign: "center" },
-  price: { fontSize: 14, color: "#777", marginBottom: 8 },
-  controls: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 6 },
-  controlBtn: { backgroundColor: "#e67e22", padding: 6, borderRadius: 20, marginHorizontal: 6 },
-  qty: { fontSize: 16, fontWeight: "bold", color: "#333", minWidth: 20, textAlign: "center" },
+  image: { width: "100%", height: 100, borderRadius: 8, marginBottom: 8 },
+  name: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    textAlign: "center",
+    color: "#333",
+    marginBottom: 4,
+  },
+  price: {
+    fontSize: 14,
+    fontFamily: "Roboto_400Regular",
+    color: "#777",
+    marginBottom: 8,
+  },
 
-  floatingCart: { position: "absolute", bottom: 20, left: 20, right: 20, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "#27ae60", paddingVertical: 14, borderRadius: 30, elevation: 4 },
-  cartText: { color: "#fff", fontWeight: "600", marginLeft: 8, fontSize: 16 },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 6,
+  },
+  controlBtn: {
+    backgroundColor: "#e67e22",
+    padding: 6,
+    borderRadius: 20,
+    marginHorizontal: 6,
+  },
+  qty: {
+    fontSize: 16,
+    fontFamily: "Roboto_700Bold",
+    color: "#333",
+    minWidth: 20,
+    textAlign: "center",
+  },
+
+  floatingContainer: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    gap: 10,
+  },
+  floatingCart: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FF8C00",
+    paddingVertical: 14,
+    borderRadius: 30,
+    elevation: 4,
+  },
+  cartText: {
+    color: "#fff",
+    fontFamily: "Roboto_700Bold",
+    marginLeft: 8,
+    fontSize: 16,
+  },
+
+  addMoreBtn: {
+    backgroundColor: "#27ae60",
+    paddingVertical: 12,
+    borderRadius: 30,
+    width: "100%",
+    alignItems: "center",
+    elevation: 3,
+  },
+  addMoreText: {
+    color: "#fff",
+    fontFamily: "Roboto_700Bold",
+    fontSize: 16,
+  },
 });

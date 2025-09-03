@@ -22,8 +22,17 @@ import {
 import { useFocusEffect, useRouter } from "expo-router";
 import ConfirmLogoutModal from "../../components/ConfirmLogoutModal";
 
-const Row = ({ iconPack = "Feather", icon, tint = "#8B8B8B", title, onPress, valueRight }) => {
-  const IconPack = { Feather, Ionicons, MaterialCommunityIcons, AntDesign }[iconPack];
+const Row = ({
+  iconPack = "Feather",
+  icon,
+  tint = "#8B8B8B",
+  title,
+  onPress,
+  valueRight,
+}) => {
+  const IconPack = { Feather, Ionicons, MaterialCommunityIcons, AntDesign }[
+    iconPack
+  ];
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -52,7 +61,9 @@ const Row = ({ iconPack = "Feather", icon, tint = "#8B8B8B", title, onPress, val
         >
           <IconPack name={icon} size={20} color={tint} />
         </View>
-        <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>{title}</Text>
+        <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>
+          {title}
+        </Text>
       </View>
       {valueRight ?? <Feather name="chevron-right" size={20} color="#C6C6C6" />}
     </TouchableOpacity>
@@ -60,7 +71,14 @@ const Row = ({ iconPack = "Feather", icon, tint = "#8B8B8B", title, onPress, val
 };
 
 const Section = ({ children }) => (
-  <View style={{ marginTop: 16, backgroundColor: "#f5f5f5", borderRadius: 16, overflow: "hidden" }}>
+  <View
+    style={{
+      marginTop: 16,
+      backgroundColor: "#f5f5f5",
+      borderRadius: 16,
+      overflow: "hidden",
+    }}
+  >
     {children}
   </View>
 );
@@ -70,8 +88,7 @@ export default function ProfileScreen() {
   const router = useRouter();
 
   const [pushEnabled, setPushEnabled] = useState(true);
-  const [settingsExpanded, setSettingsExpanded] = useState(true);
-  const [theme, setTheme] = useState("System");
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [cameraAllowed, setCameraAllowed] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -81,13 +98,13 @@ export default function ProfileScreen() {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => true;
-      const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      const sub = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
       return () => sub.remove();
     }, [])
   );
-
-  const cycleTheme = () =>
-    setTheme((prev) => (prev === "System" ? "Light" : prev === "Light" ? "Dark" : "System"));
 
   const requestOrToggleCamera = () => {
     if (!cameraAllowed) {
@@ -98,7 +115,11 @@ export default function ProfileScreen() {
     } else {
       Alert.alert("Revoke Permission?", "Simulating revoking camera access", [
         { text: "Keep", style: "cancel" },
-        { text: "Revoke", style: "destructive", onPress: () => setCameraAllowed(false) },
+        {
+          text: "Revoke",
+          style: "destructive",
+          onPress: () => setCameraAllowed(false),
+        },
       ]);
     }
   };
@@ -112,7 +133,11 @@ export default function ProfileScreen() {
     } else {
       Alert.alert("Revoke Permission?", "Simulating revoking location access", [
         { text: "Keep", style: "cancel" },
-        { text: "Revoke", style: "destructive", onPress: () => setLocationAllowed(false) },
+        {
+          text: "Revoke",
+          style: "destructive",
+          onPress: () => setLocationAllowed(false),
+        },
       ]);
     }
   };
@@ -138,17 +163,38 @@ export default function ProfileScreen() {
           overflow: "hidden",
         }}
       >
-        <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(254,192,117,0.5)" }} />
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: "rgba(254,192,117,0.5)",
+          }}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={26} color="black" />
           </TouchableOpacity>
-          <Text style={{ fontSize: 30, fontFamily: "Roboto_700Bold", color: "black" }}>Profile</Text>
+          <Text
+            style={{
+              fontSize: 30,
+              fontFamily: "Roboto_700Bold",
+              color: "black",
+            }}
+          >
+            Profile
+          </Text>
           <Ionicons name="person-outline" size={26} color="black" />
         </View>
       </ImageBackground>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+      >
         {/* Avatar */}
         <View
           style={{
@@ -172,7 +218,9 @@ export default function ProfileScreen() {
             style={{ width: 64, height: 64, borderRadius: 32 }}
           />
           <View style={{ marginLeft: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "#333" }}>Joseph Andrade</Text>
+            <Text style={{ fontSize: 18, fontWeight: "600", color: "#333" }}>
+              Joseph Andrade
+            </Text>
           </View>
         </View>
 
@@ -186,65 +234,128 @@ export default function ProfileScreen() {
             marginBottom: -5,
           }}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialCommunityIcons name="star-circle" size={28} color="#fff" />
-              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16, marginLeft: 8 }}>Credit Points</Text>
+              <MaterialCommunityIcons
+                name="star-circle"
+                size={28}
+                color="#fff"
+              />
+              <Text
+                style={{
+                  color: "#fff",
+                  fontWeight: "600",
+                  fontSize: 16,
+                  marginLeft: 8,
+                }}
+              >
+                Credit Points
+              </Text>
             </View>
             <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 20 }}>{creditPoints}</Text>
-              <Text style={{ color: "#fff", fontSize: 14, marginLeft: 4 }}>pts</Text>
-              <Feather name="chevron-right" size={18} color="#fff" style={{ marginLeft: 6 }} />
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 20 }}>
+                {creditPoints}
+              </Text>
+              <Text style={{ color: "#fff", fontSize: 14, marginLeft: 4 }}>
+                pts
+              </Text>
+              <Feather
+                name="chevron-right"
+                size={18}
+                color="#fff"
+                style={{ marginLeft: 6 }}
+              />
             </View>
           </View>
-          <Text style={{ color: "#fff", marginTop: 4, fontSize: 12 }}>Use points at checkout to save on your next order.</Text>
+          <Text style={{ color: "#fff", marginTop: 4, fontSize: 12 }}>
+            Use points at checkout to save on your next order.
+          </Text>
         </TouchableOpacity>
 
         {/* Sections */}
         <Section>
-          <Row iconPack="Feather" icon="user" tint="#F07F13" title="Personal Info" onPress={() => router.push("/screens/PersonalInfo")} />
-          <Row iconPack="Feather" icon="message-circle" tint="#6ED3C7" title="Share Feedback" onPress={() => router.push("/screens/Feedback")} />
+          <Row
+            iconPack="Feather"
+            icon="user"
+            tint="#F07F13"
+            title="Personal Info"
+            onPress={() => router.push("/screens/PersonalInfo")}
+          />
+          <Row
+            iconPack="Feather"
+            icon="message-circle"
+            tint="#6ED3C7"
+            title="Share Feedback"
+            onPress={() => router.push("/screens/Feedback")}
+          />
         </Section>
 
         <Section>
-          <Row iconPack="AntDesign" icon="questioncircleo" tint="#FF6F61" title="FAQs" onPress={() => router.push("/screens/FAQs")} />
-          
-          {/* Structured Settings */}
+          <Row
+            iconPack="AntDesign"
+            icon="questioncircleo"
+            tint="#FF6F61"
+            title="FAQs"
+            onPress={() => router.push("/screens/FAQs")}
+          />
+
+          {/* Settings */}
           <Row
             iconPack="Feather"
             icon="settings"
             tint="#8B5CF6"
             title="Settings"
-            onPress={() => setSettingsExpanded(prev => !prev)}
-            valueRight={<Feather name={settingsExpanded ? "chevron-up" : "chevron-down"} size={20} color="#C6C6C6" />}
+            onPress={() => setSettingsExpanded((prev) => !prev)}
+            valueRight={
+              <Feather
+                name={settingsExpanded ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#C6C6C6"
+              />
+            }
           />
+
           {settingsExpanded && (
             <View style={{ marginTop: 8, paddingHorizontal: 8 }}>
-              {/* App Preferences */}
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280", marginVertical: 6 }}>App Preferences</Text>
-              <Row
-                iconPack="Feather"
-                icon="moon"
-                tint="#7C3AED"
-                title="Appearance"
-                onPress={cycleTheme}
-                valueRight={
-                  <View style={{ backgroundColor: "#EDE9FE", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                    <Text style={{ color: "#5B21B6", fontSize: 12 }}>{theme}</Text>
-                  </View>
-                }
-              />
+              {/* Notifications */}
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#6B7280",
+                  marginVertical: 6,
+                }}
+              >
+                App Preferences
+              </Text>
               <Row
                 iconPack="Feather"
                 icon="bell"
                 tint="#10B981"
                 title="Notifications"
-                onPress={() => setPushEnabled(prev => !prev)}
-                valueRight={<Switch value={pushEnabled} onValueChange={setPushEnabled} />}
+                onPress={() => setPushEnabled((prev) => !prev)}
+                valueRight={
+                  <Switch value={pushEnabled} onValueChange={setPushEnabled} />
+                }
               />
 
               {/* Permissions */}
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280", marginVertical: 6 }}>Permissions</Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#6B7280",
+                  marginVertical: 6,
+                }}
+              >
+                Permissions
+              </Text>
               <Row
                 iconPack="Feather"
                 icon="camera"
@@ -253,8 +364,23 @@ export default function ProfileScreen() {
                 onPress={requestOrToggleCamera}
                 valueRight={
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginRight: 6, backgroundColor: cameraAllowed ? "#DCFCE7" : "#FEE2E2" }}>
-                      <Text style={{ color: cameraAllowed ? "#166534" : "#991B1B", fontSize: 12 }}>{cameraAllowed ? "Allowed" : "Not allowed"}</Text>
+                    <View
+                      style={{
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        borderRadius: 6,
+                        marginRight: 6,
+                        backgroundColor: cameraAllowed ? "#DCFCE7" : "#FEE2E2",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: cameraAllowed ? "#166534" : "#991B1B",
+                          fontSize: 12,
+                        }}
+                      >
+                        {cameraAllowed ? "Allowed" : "Not allowed"}
+                      </Text>
                     </View>
                     <Feather name="chevron-right" size={18} color="#C6C6C6" />
                   </View>
@@ -274,10 +400,17 @@ export default function ProfileScreen() {
                         paddingVertical: 2,
                         borderRadius: 6,
                         marginRight: 6,
-                        backgroundColor: locationAllowed ? "#DCFCE7" : "#FEE2E2",
+                        backgroundColor: locationAllowed
+                          ? "#DCFCE7"
+                          : "#FEE2E2",
                       }}
                     >
-                      <Text style={{ color: locationAllowed ? "#166534" : "#991B1B", fontSize: 12 }}>
+                      <Text
+                        style={{
+                          color: locationAllowed ? "#166534" : "#991B1B",
+                          fontSize: 12,
+                        }}
+                      >
                         {locationAllowed ? "Allowed" : "Not allowed"}
                       </Text>
                     </View>
@@ -287,28 +420,91 @@ export default function ProfileScreen() {
               />
 
               {/* Account & Security */}
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280", marginVertical: 6 }}>Account & Security</Text>
-              <Row iconPack="Feather" icon="credit-card" tint="#F59E0B" title="Payment Methods" onPress={() => router.push("/screens/PaymentMethods")} />
-              <Row iconPack="Feather" icon="archive" tint="#3B82F6" title="Order History" onPress={() => router.push("/screens/OrderHistory")} />
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#6B7280",
+                  marginVertical: 6,
+                }}
+              >
+                Account & Security
+              </Text>
+              <Row
+                iconPack="Feather"
+                icon="credit-card"
+                tint="#F59E0B"
+                title="Payment Methods"
+                onPress={() => router.push("/screens/PaymentMethods")}
+              />
+              <Row
+                iconPack="Feather"
+                icon="archive"
+                tint="#3B82F6"
+                title="Order History"
+                onPress={() => router.push("/screens/OrderHistory")}
+              />
 
               {/* Optional Extras */}
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#6B7280", marginVertical: 6 }}>Extras</Text>
-              <Row iconPack="Feather" icon="heart" tint="#F472B6" title="Dietary Preferences" onPress={() => router.push("/screens/DietaryPreferences")} />
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: "#6B7280",
+                  marginVertical: 6,
+                }}
+              >
+                Extras
+              </Text>
+              <Row
+                iconPack="Feather"
+                icon="heart"
+                tint="#F472B6"
+                title="Dietary Preferences"
+                onPress={() => router.push("/screens/DietaryPreferences")}
+              />
             </View>
           )}
         </Section>
 
         <Section>
-          <Row iconPack="Feather" icon="info" tint="#3B82F6" title="About" onPress={() => Linking.openURL("https://www.facebook.com/jseph.andrade")} />
-          <Row iconPack="Feather" icon="file-text" tint="#9CA3AF" title="Legal & Policies" onPress={() => Linking.openURL("https://www.facebook.com/jseph.andrade")} />
+          <Row
+            iconPack="Feather"
+            icon="info"
+            tint="#3B82F6"
+            title="About"
+            onPress={() =>
+              Linking.openURL("https://www.facebook.com/jseph.andrade")
+            }
+          />
+          <Row
+            iconPack="Feather"
+            icon="file-text"
+            tint="#9CA3AF"
+            title="Legal & Policies"
+            onPress={() =>
+              Linking.openURL("https://www.facebook.com/jseph.andrade")
+            }
+          />
         </Section>
 
         <Section>
-          <Row iconPack="Feather" icon="log-out" tint="#EF4444" title="Log Out" onPress={() => setShowLogoutConfirm(true)} />
+          <Row
+            iconPack="Feather"
+            icon="log-out"
+            tint="#EF4444"
+            title="Log Out"
+            onPress={() => setShowLogoutConfirm(true)}
+          />
         </Section>
       </ScrollView>
 
-      <ConfirmLogoutModal visible={showLogoutConfirm} onCancel={() => setShowLogoutConfirm(false)} onConfirm={confirmLogoutAndNavigate} />
+      {/* Logout Modal */}
+      <ConfirmLogoutModal
+        visible={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={confirmLogoutAndNavigate}
+      />
     </View>
   );
 }

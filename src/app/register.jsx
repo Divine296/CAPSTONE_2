@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  Image,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -208,10 +209,9 @@ export default function RegisterScreen() {
               style={styles.googleButton}
               onPress={() => alert("Google sign up not implemented")}
             >
-              <MaterialCommunityIcons
-                name="google"
-                size={24} // slightly bigger for bolder look
-                color="#DB4437"
+              <Image
+                source={require("../../assets/google.png")} // ✅ add google.png to your assets folder
+                style={styles.googleIcon}
               />
               <Text style={styles.googleText}>Sign up with Google</Text>
             </TouchableOpacity>
@@ -307,18 +307,23 @@ const styles = StyleSheet.create({
   line: { flex: 1, height: 1, backgroundColor: "#ccc" },
   orText: { marginHorizontal: 10, color: "#888" },
   googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    paddingVertical: 12,
-    borderRadius: 12,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#fff",
+  borderWidth: 1,
+  borderColor: "#ddd",
+  paddingVertical: 12,
+  borderRadius: 12,
+  },
+  googleIcon: {
+    width: 22,
+    height: 22,
+    marginRight: 10,
   },
   googleText: {
-    marginLeft: 10,
     fontSize: 16,
     fontFamily: "Roboto_700Bold",
+    color: "#333",
   },
 });

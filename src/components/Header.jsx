@@ -92,7 +92,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginHorizontal: 12,
-    marginBottom: 22,
+    marginBottom: 18,
+    marginTop: 15,
   },
   homeText: {
     fontSize: 30,
@@ -125,10 +126,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 24,
+    borderRadius: 30,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginHorizontal: 12,
+    paddingVertical: 5,
+    marginHorizontal: 13,
   },
   searchInput: {
     flex: 1,
